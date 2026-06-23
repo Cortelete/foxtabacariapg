@@ -25,3 +25,18 @@ body {
   background-size: 200% 200%;
   animation: gradient 10s ease infinite;
 }
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(39, 39, 42, 0.5); /* zinc-800/50 */
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(82, 82, 91, 0.8); /* zinc-600 */
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(249, 115, 22, 0.8); /* orange-500 */
+}

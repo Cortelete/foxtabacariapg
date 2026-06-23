@@ -1,8 +1,29 @@
 import { useState } from 'react';
-import { motion } from 'motion/react';
-import { Instagram, MapPin, MessageCircle, Star, Phone, CheckSquare, Square } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Instagram, MapPin, MessageCircle, Star, Phone, CheckSquare, Square, Plus, Minus } from 'lucide-react';
 import { Modal } from './components/Modal';
 import { LinkButton } from './components/LinkButton';
+
+interface ContactItem {
+  id: string;
+  name: string;
+  quantity: number;
+  brand: string;
+  selected: boolean;
+}
+
+const initialTop10: ContactItem[] = [
+  { id: '1', name: 'Sedas', quantity: 1, brand: '', selected: false },
+  { id: '2', name: 'Piteiras de Papel', quantity: 1, brand: '', selected: false },
+  { id: '3', name: 'Piteiras de Vidro', quantity: 1, brand: '', selected: false },
+  { id: '4', name: 'Bongs', quantity: 1, brand: '', selected: false },
+  { id: '5', name: 'Tabacos', quantity: 1, brand: '', selected: false },
+  { id: '6', name: 'Isqueiros / Maçaricos', quantity: 1, brand: '', selected: false },
+  { id: '7', name: 'Dichavadores', quantity: 1, brand: '', selected: false },
+  { id: '8', name: 'Cinzeiros', quantity: 1, brand: '', selected: false },
+  { id: '9', name: 'Cuias', quantity: 1, brand: '', selected: false },
+  { id: '10', name: 'Blunts', quantity: 1, brand: '', selected: false },
+];
 
 export default function App() {
   const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
@@ -11,27 +32,57 @@ export default function App() {
   const [isCreditsModalOpen, setIsCreditsModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [isAnimatingLogo, setIsAnimatingLogo] = useState(false);
 
   // Form states
   const [contactName, setContactName] = useState('');
-  const [contactItems, setContactItems] = useState<string[]>([]);
+  const [contactItems, setContactItems] = useState<ContactItem[]>(initialTop10);
   const [reviewScore, setReviewScore] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [developerName, setDeveloperName] = useState('');
 
+  const handleLogoClick = () => {
+    if (isAnimatingLogo) return;
+    setIsAnimatingLogo(true);
+    setTimeout(() => {
+      setIsAnimatingLogo(false);
+      setIsLogoModalOpen(true);
+    }, 600);
+  };
+
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const itemsText = contactItems.length > 0 ? ` Procuro por: ${contactItems.join(', ')}.` : '';
-    const msg = `Olá, meu nome é ${contactName}.${itemsText} Gostaria de mais informações!`;
+    
+    const selectedItems = contactItems.filter(item => item.selected);
+    
+    let msg = `Oi, meu nome é ${contactName} e vim através do cartão digital, gostaria de comprar:\n\n`;
+    
+    if (selectedItems.length > 0) {
+      selectedItems.forEach(item => {
+        const brandText = item.brand ? ` (Marca: ${item.brand})` : '';
+        msg += `- ${item.quantity} unidades de ${item.name}${brandText}\n`;
+      });
+    } else {
+      msg += `- Gostaria de conhecer o catálogo\n`;
+    }
+    
+    msg += `\nObrigado!`;
+    
     const encoded = encodeURIComponent(msg);
     window.open(`https://wa.me/5542999080012?text=${encoded}`, '_blank');
     setIsContactModalOpen(false);
   };
 
-  const handleItemToggle = (item: string) => {
-    setContactItems(prev => 
-      prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
-    );
+  const handleItemToggle = (id: string) => {
+    setContactItems(prev => prev.map(item => 
+      item.id === id ? { ...item, selected: !item.selected } : item
+    ));
+  };
+
+  const handleItemUpdate = (id: string, field: 'quantity' | 'brand', value: any) => {
+    setContactItems(prev => prev.map(item => 
+      item.id === id ? { ...item, [field]: value } : item
+    ));
   };
 
   const handleReviewSelect = (score: number) => {
@@ -99,11 +150,11 @@ export default function App() {
         >
           {/* Spinny Coin Logo */}
           <motion.div
-            className="mb-3 sm:mb-6 cursor-pointer relative"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95, rotateY: 360 }}
-            transition={{ rotateY: { duration: 0.5, ease: "easeInOut" } }}
-            onClick={() => setIsLogoModalOpen(true)}
+            className="mb-3 sm:mb-6 cursor-pointer relative z-20"
+            whileHover={!isAnimatingLogo ? { scale: 1.05 } : {}}
+            animate={isAnimatingLogo ? { scale: 1.5, rotateY: 720, zIndex: 50 } : { scale: 1, rotateY: 0, zIndex: 20 }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
+            onClick={handleLogoClick}
           >
             <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-orange-600 to-amber-500 opacity-20 blur-xl"></div>
             <div className="relative h-24 w-24 sm:h-32 sm:w-32 mx-auto drop-shadow-2xl">
@@ -206,22 +257,64 @@ export default function App() {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-zinc-400 mb-3 ml-1">O que você procura? (Opcional)</label>
-            <div className="flex flex-col gap-2.5">
-              {['Sedas', 'Piteiras', 'Bongs', 'Tabacos', 'Itens Headshop'].map(item => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => handleItemToggle(item)}
-                  className="flex items-center gap-3 text-left w-full group outline-none"
-                >
-                  <div className={`p-0.5 rounded-md transition-colors ${contactItems.includes(item) ? 'bg-orange-500 text-zinc-900' : 'bg-zinc-800 text-zinc-500 group-hover:bg-zinc-700'}`}>
-                    {contactItems.includes(item) ? <CheckSquare size={16} /> : <Square size={16} />}
-                  </div>
-                  <span className={`text-sm transition-colors ${contactItems.includes(item) ? 'text-zinc-200' : 'text-zinc-400 group-hover:text-zinc-300'}`}>
-                    {item}
-                  </span>
-                </button>
+            <label className="block text-xs font-medium text-zinc-400 mb-3 ml-1">Top 10 itens (Selecione o que procura)</label>
+            <div className="flex flex-col gap-2.5 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+              {contactItems.map(item => (
+                <div key={item.id} className="flex flex-col gap-2 bg-zinc-950/50 p-3 rounded-xl border border-zinc-800/50">
+                  <button
+                    type="button"
+                    onClick={() => handleItemToggle(item.id)}
+                    className="flex items-center gap-3 text-left w-full group outline-none"
+                  >
+                    <div className={`p-0.5 rounded-md transition-colors ${item.selected ? 'bg-orange-500 text-zinc-900' : 'bg-zinc-800 text-zinc-500 group-hover:bg-zinc-700'}`}>
+                      {item.selected ? <CheckSquare size={16} /> : <Square size={16} />}
+                    </div>
+                    <span className={`text-sm font-medium transition-colors ${item.selected ? 'text-zinc-200' : 'text-zinc-400 group-hover:text-zinc-300'}`}>
+                      {item.name}
+                    </span>
+                  </button>
+                  
+                  <AnimatePresence>
+                    {item.selected && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="flex flex-col sm:flex-row gap-3 pt-2 pb-1">
+                          <div className="flex-1">
+                            <input
+                              type="text"
+                              value={item.brand}
+                              onChange={(e) => handleItemUpdate(item.id, 'brand', e.target.value)}
+                              placeholder="Marca (Opcional)"
+                              className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-orange-500/50 transition-colors"
+                            />
+                          </div>
+                          <div className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 shrink-0">
+                            <span className="text-xs text-zinc-500">Qtd:</span>
+                            <button
+                              type="button"
+                              onClick={() => handleItemUpdate(item.id, 'quantity', Math.max(1, item.quantity - 1))}
+                              className="text-zinc-400 hover:text-orange-500 transition-colors"
+                            >
+                              <Minus size={14} />
+                            </button>
+                            <span className="text-xs font-medium text-zinc-200 w-4 text-center">{item.quantity}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleItemUpdate(item.id, 'quantity', item.quantity + 1)}
+                              className="text-zinc-400 hover:text-orange-500 transition-colors"
+                            >
+                              <Plus size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               ))}
             </div>
           </div>
