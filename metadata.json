@@ -1,0 +1,6 @@
+{
+  "name": "Fox Tabacaria PG",
+  "description": "Site elegante, responsivo e exclusivo para Fox Tabacaria PG.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
