@@ -12,6 +12,26 @@ interface ContactItem {
   selected: boolean;
 }
 
+function WhatsAppIcon({ size = 24, className = "" }: { size?: number, className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9l-5.05.9" />
+      <path d="M9 10a.5.5 0 0 0 1 0v-1a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1" />
+    </svg>
+  );
+}
+
 const initialTop10: ContactItem[] = [
   { id: '1', name: 'Sedas', quantity: 1, brand: '', selected: false },
   { id: '2', name: 'Piteiras de Papel', quantity: 1, brand: '', selected: false },
@@ -23,6 +43,7 @@ const initialTop10: ContactItem[] = [
   { id: '8', name: 'Cinzeiros', quantity: 1, brand: '', selected: false },
   { id: '9', name: 'Cuias', quantity: 1, brand: '', selected: false },
   { id: '10', name: 'Blunts', quantity: 1, brand: '', selected: false },
+  { id: '11', name: 'O que procuro não está na lista', quantity: 1, brand: '', selected: false },
 ];
 
 export default function App() {
@@ -192,8 +213,8 @@ export default function App() {
           />
           <LinkButton 
             onClick={() => setIsContactModalOpen(true)}
-            icon={<MessageCircle size={18} className="sm:w-5 sm:h-5" />}
-            label="Contato e Orçamentos"
+            icon={<WhatsAppIcon size={18} className="sm:w-5 sm:h-5" />}
+            label="Contato e Produtos"
           />
           <LinkButton 
             onClick={() => setIsMapModalOpen(true)}
